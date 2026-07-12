@@ -71,9 +71,9 @@ def create_spend_chart(categories):
     max_lenght_category = 0
     lenght_names = []
     spends = []
-    line_ = '    -'
+    line_ = '    '
     for category in categories:
-        line_ += '--'
+        line_ += '---'
         spend = 0
         lenght_name = len(category.name)
         lenght_names.append(lenght_name)
@@ -84,14 +84,20 @@ def create_spend_chart(categories):
                 spend += abs(event['amount'])
         spends.append(spend)
     all_spends = sum(spends)
-    percent_spends = [int(i/all_spends *100) //10 * 10 if all_spends > 0 else 0 for i in spends]
+    percent_spends = []
+    for i in spends:
+        if all_spends > 0:
+            percent = i / all_spends * 100
+        else:
+            percent = 0
+        percent_spends.append(percent//10 * 10)
     for i in range(11):
-        line = f'{10 * (10 - i)}| '
+        line = f'{10 * (10 - i)}|'
         for j in percent_spends:
             if j >= 10 * (10 - i):
-                line += 'o '
+                line += ' o '
             else:
-                line += '  '
+                line += '   '
         if i == 0:
             chart += f'\n{line} '
         elif i == 10:
@@ -101,18 +107,12 @@ def create_spend_chart(categories):
     line_ += '-'
     chart += f'\n{line_}'
     for i in range(max_lenght_category):
-        line = 5 * ' '
+        line = 4 * ' '
         for index, category in enumerate(categories):
             if not lenght_names[index] < i + 1:
-                line += f'{category.name[i]}' + ' '
+                line += ' ' + f'{category.name[i]}' + ' '
             else:
-                line += '  '
+                line += '   '
         line += ' '
         chart += f'\n{line}'
     return chart
-
-food = Category('Food')
-food.withdraw(10.15, 'groceries')
-clothes = Category('Clothes')
-clothes.withdraw(100.15, 'dress')
-print(create_spend_chart([food, clothes]))
