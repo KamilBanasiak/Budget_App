@@ -37,7 +37,34 @@ class Category:
             return True        
         
     def __str__(self):
-        pass
+        lines = []
+        lenght_name = len(self.name)
+        rest_of_title_line = 30 - lenght_name
+        if rest_of_title_line % 2 == 0:
+            title_line = (rest_of_title_line // 2) * '*' + self.name + (rest_of_title_line // 2) * '*'
+        else:
+            title_line = (rest_of_title_line // 2) * '*' + self.name + (rest_of_title_line // 2 + 1) * '*'
+        lines.append(title_line)
+        for index, event in enumerate(self.ledger):
+            line = event['description'][:23]
+            lenght_description = len(line)
+            if isinstance(event['amount'], float):
+                price = str(event['amount'])
+            else:
+                price = str(float(event['amount']))
+            if price[-2] == '.':
+                price += '0'
+            if not price[-3] == '.':
+                price = price[:price.find('.')+3]
+            lenght_price = len(price)
+            line += (30 - lenght_description - lenght_price) * ' ' + price
+            lines.append(line)
+        end_line = f'Total: {self.get_balance()}'
+        text = ''
+        for line in lines:
+            text += f'{line}\n'
+        text += end_line
+        return text
 
 def create_spend_chart(categories):
     pass
