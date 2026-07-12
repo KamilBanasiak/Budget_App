@@ -7,27 +7,27 @@ class Category:
     def deposit(self, amount, description=''):
         self.ledger.append({'amount': amount, 'description': description})
         
-    def withdraw(self, amount, description=''):
-        self.deposit(-amount, description)
+    def withdraw(self, amount, description=''):        
         succeed = self.check_funds(amount)
         if not succeed:
             return False
         else:
+            self.deposit(-amount, description)
             return True
         
     def get_balance(self):
         balance = 0
-        for index, event in enumerate(self.ledger):
+        for event in self.ledger:
             balance += event['amount']
         return balance
             
-    def transfer(self, amount, other):
-        self.withdraw(amount, f'Transfer to {other.name}')
-        other.deposit(amount, f'Transfer from {self.name}')
+    def transfer(self, amount, other):       
         succeed = self.check_funds(amount)
         if not succeed:
             return False
         else:
+            self.withdraw(amount, f'Transfer to {other.name}')
+            other.deposit(amount, f'Transfer from {self.name}')
             return True
        
     def check_funds(self, amount):
@@ -45,7 +45,7 @@ class Category:
         else:
             title_line = (rest_of_title_line // 2) * '*' + self.name + (rest_of_title_line // 2 + 1) * '*'
         lines.append(title_line)
-        for index, event in enumerate(self.ledger):
+        for event in self.ledger:
             line = event['description'][:23]
             lenght_description = len(line)
             if isinstance(event['amount'], float):
@@ -67,4 +67,52 @@ class Category:
         return text
 
 def create_spend_chart(categories):
-    pass
+    chart = 'Percentage spent by category'
+    max_lenght_category = 0
+    lenght_names = []
+    spends = []
+    line_ = '    -'
+    for category in categories:
+        line_ += '--'
+        spend = 0
+        lenght_name = len(category.name)
+        lenght_names.append(lenght_name)
+        if lenght_name > max_lenght_category:
+            max_lenght_category = lenght_name
+        for event in category.ledger:
+            if event['amount'] < 0 :
+                spend += abs(event['amount'])
+        spends.append(spend)
+    all_spends = sum(spends)
+    percent_spends = [int(i/all_spends *100) //10 * 10 if all_spends > 0 else 0 for i in spends]
+    for i in range(11):
+        line = f'{10 * (10 - i)}| '
+        for j in percent_spends:
+            if j >= 10 * (10 - i):
+                line += 'o '
+            else:
+                line += '  '
+        if i == 0:
+            chart += f'\n{line} '
+        elif i == 10:
+            chart += f'\n  {line} '
+        else:
+            chart += f'\n {line} '
+    line_ += '-'
+    chart += f'\n{line_}'
+    for i in range(max_lenght_category):
+        line = 5 * ' '
+        for index, category in enumerate(categories):
+            if not lenght_names[index] < i + 1:
+                line += f'{category.name[i]}' + ' '
+            else:
+                line += '  '
+        line += ' '
+        chart += f'\n{line}'
+    return chart
+
+food = Category('Food')
+food.withdraw(10.15, 'groceries')
+clothes = Category('Clothes')
+clothes.withdraw(100.15, 'dress')
+print(create_spend_chart([food, clothes]))
